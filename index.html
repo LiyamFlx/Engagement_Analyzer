@@ -1,219 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EngageSense</title>
     <style>
-        :root {
-            --bg-color: #1a1a2e;
-            --text-color: #ffffff;
-            --button-color: #4a90e2;
-            --hover-color: #357ab8;
-            --progress-bg: #333;
-            --progress-color: #4caf50;
-        }
-
+        /* General Styles */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #121212;
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        .container {
-            text-align: center;
-            max-width: 600px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        h1, h2 {
-            color: var(--text-color);
-            margin: 20px 0;
-        }
-
-        button {
-            background-color: var(--button-color);
-            border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            color: var(--text-color);
-            font-size: 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: var(--hover-color);
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        label {
-            background-color: var(--button-color);
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .progress-bar {
-            margin: 20px 0;
-            width: 100%;
-            height: 10px;
-            background-color: var(--progress-bg);
-            border-radius: 5px;
+            height: 100vh;
             overflow: hidden;
         }
-
-        .progress-bar-fill {
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3b82f6;
+            color: #ffffff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #444;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-bar-inner {
             height: 100%;
-            width: 0%;
-            background-color: var(--progress-color);
-            transition: width 0.5s;
+            width: 0;
+            background: #3b82f6;
+            transition: width 0.5s ease;
         }
-
-        .chart-container {
-            margin: 20px auto;
-            width: 100%;
-            max-width: 500px;
-            display: none;
-        }
-
-        canvas {
-            width: 100%;
-            height: auto;
-        }
-
         .hidden {
             display: none;
         }
+        canvas {
+            margin: 20px auto;
+            display: block;
+        }
     </style>
 </head>
-
 <body>
-    <div class="container" id="welcome-screen">
+    <div id="welcome-screen" class="container">
         <h1>Welcome to EngageSense</h1>
-        <video width="100%" controls>
-            <source src="mixer.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <button id="get-started-btn">Get Started</button>
-        <button id="learn-more-btn">Learn More</button>
+        <p>Analyze audio engagement with cutting-edge technology.</p>
+        <button id="start-button">Get Started</button>
     </div>
 
-    <div class="container hidden" id="upload-screen">
+    <div id="upload-record-screen" class="container hidden">
         <h1>Upload or Record Audio</h1>
-        <label for="audio-upload">Upload Track</label>
-        <input type="file" id="audio-upload" accept=".mp3, .wav">
-        <button id="analyze-upload-btn">Analyze Upload</button>
-        <br>
-        <button id="record-btn">Start Recording</button>
-        <button id="stop-record-btn" class="hidden">Stop Recording</button>
-        <button id="analyze-record-btn" class="hidden">Analyze Recording</button>
+        <div>
+            <button id="upload-button">Upload Track</button>
+            <button id="analyze-upload">Analyze Upload</button>
+        </div>
+        <div>
+            <button id="record-button">Start Recording</button>
+            <button id="stop-recording" class="hidden">Stop Recording</button>
+            <button id="analyze-recording" class="hidden">Analyze Recording</button>
+        </div>
         <div class="progress-bar">
-            <div class="progress-bar-fill" id="upload-progress"></div>
+            <div id="progress-bar-inner" class="progress-bar-inner"></div>
         </div>
-        <button id="back-to-welcome-btn">Back</button>
-        <button id="next-to-analysis-btn" class="hidden">Next</button>
+        <button id="back-to-welcome">Back</button>
     </div>
 
-    <div class="container hidden" id="results-screen">
+    <div id="analysis-screen" class="container hidden">
+        <h1>Analyzing...</h1>
+        <p>Please wait while we process your audio data.</p>
+        <div class="progress-bar">
+            <div id="progress-bar-inner-analysis" class="progress-bar-inner"></div>
+        </div>
+    </div>
+
+    <div id="results-screen" class="container hidden">
         <h1>Results Summary</h1>
-        <h2>Engagement Metrics</h2>
-        <ul>
-            <li>Physical Engagement: <span id="physical-metric">85%</span></li>
-            <li>Emotional Engagement: <span id="emotional-metric">78%</span></li>
-            <li>Mental Engagement: <span id="mental-metric">92%</span></li>
-            <li>Spiritual Engagement: <span id="spiritual-metric">67%</span></li>
-        </ul>
-        <div class="chart-container">
-            <canvas id="engagement-chart"></canvas>
-        </div>
-        <button id="back-to-upload-btn">Back</button>
-        <button id="start-over-btn">Start Over</button>
+        <p>Physical Engagement: <strong>85%</strong></p>
+        <p>Emotional Engagement: <strong>78%</strong></p>
+        <p>Mental Engagement: <strong>92%</strong></p>
+        <p>Spiritual Engagement: <strong>67%</strong></p>
+        <canvas id="results-chart" width="400" height="300"></canvas>
+        <button id="start-over">Start Over</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const welcomeScreen = document.getElementById("welcome-screen");
-        const uploadScreen = document.getElementById("upload-screen");
-        const resultsScreen = document.getElementById("results-screen");
+        // References to DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const uploadRecordScreen = document.getElementById('upload-record-screen');
+        const analysisScreen = document.getElementById('analysis-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const progressBarInner = document.getElementById('progress-bar-inner');
+        const progressBarInnerAnalysis = document.getElementById('progress-bar-inner-analysis');
+        const startButton = document.getElementById('start-button');
+        const backToWelcome = document.getElementById('back-to-welcome');
+        const uploadButton = document.getElementById('upload-button');
+        const analyzeUploadButton = document.getElementById('analyze-upload');
+        const recordButton = document.getElementById('record-button');
+        const stopRecordingButton = document.getElementById('stop-recording');
+        const analyzeRecordingButton = document.getElementById('analyze-recording');
+        const startOverButton = document.getElementById('start-over');
 
-        document.getElementById("get-started-btn").addEventListener("click", () => {
-            welcomeScreen.classList.add("hidden");
-            uploadScreen.classList.remove("hidden");
-        });
+        // Navigation Handlers
+        startButton.onclick = () => {
+            welcomeScreen.classList.add('hidden');
+            uploadRecordScreen.classList.remove('hidden');
+        };
 
-        document.getElementById("learn-more-btn").addEventListener("click", () => {
-            alert("EngageSense provides audio analysis to understand audience engagement metrics.");
-        });
+        backToWelcome.onclick = () => {
+            uploadRecordScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        };
 
-        document.getElementById("audio-upload").addEventListener("change", () => {
-            document.getElementById("upload-progress").style.width = "100%";
-            document.getElementById("analyze-upload-btn").classList.remove("hidden");
-        });
+        analyzeUploadButton.onclick = () => startAnalysis();
+        analyzeRecordingButton.onclick = () => startAnalysis();
 
-        document.getElementById("analyze-upload-btn").addEventListener("click", () => {
-            alert("Analyzing uploaded audio...");
-        });
+        startOverButton.onclick = () => {
+            resultsScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        };
 
-        document.getElementById("record-btn").addEventListener("click", () => {
-            document.getElementById("record-btn").classList.add("hidden");
-            document.getElementById("stop-record-btn").classList.remove("hidden");
-        });
-
-        document.getElementById("stop-record-btn").addEventListener("click", () => {
-            document.getElementById("stop-record-btn").classList.add("hidden");
-            document.getElementById("analyze-record-btn").classList.remove("hidden");
-        });
-
-        document.getElementById("analyze-record-btn").addEventListener("click", () => {
-            alert("Analyzing recorded audio...");
-        });
-
-        document.getElementById("back-to-welcome-btn").addEventListener("click", () => {
-            uploadScreen.classList.add("hidden");
-            welcomeScreen.classList.remove("hidden");
-        });
-
-        document.getElementById("next-to-analysis-btn").addEventListener("click", () => {
-            uploadScreen.classList.add("hidden");
-            resultsScreen.classList.remove("hidden");
-
-            const ctx = document.getElementById("engagement-chart").getContext("2d");
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ["Physical", "Emotional", "Mental", "Spiritual"],
-                    datasets: [{
-                        label: "Engagement (%)",
-                        data: [85, 78, 92, 67],
-                        backgroundColor: ["#f39c12", "#e74c3c", "#3498db", "#9b59b6"],
-                    }]
+        function startAnalysis() {
+            uploadRecordScreen.classList.add('hidden');
+            analysisScreen.classList.remove('hidden');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBarInnerAnalysis.style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    analysisScreen.classList.add('hidden');
+                    resultsScreen.classList.remove('hidden');
+                    renderChart();
                 }
+            }, 500);
+        }
+
+        // Chart Rendering
+        function renderChart() {
+            const canvas = document.getElementById('results-chart');
+            const ctx = canvas.getContext('2d');
+            const data = [85, 78, 92, 67];
+            const labels = ['Physical', 'Emotional', 'Mental', 'Spiritual'];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const barWidth = 80;
+            const gap = 20;
+            data.forEach((value, index) => {
+                const x = index * (barWidth + gap) + gap;
+                const y = canvas.height - (value / 100) * canvas.height;
+                ctx.fillStyle = ['#f87171', '#60a5fa', '#a78bfa', '#facc15'][index];
+                ctx.fillRect(x, y, barWidth, canvas.height - y);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(labels[index], x + barWidth / 2 - 20, canvas.height - 10);
             });
-        });
-
-        document.getElementById("back-to-upload-btn").addEventListener("click", () => {
-            resultsScreen.classList.add("hidden");
-            uploadScreen.classList.remove("hidden");
-        });
-
-        document.getElementById("start-over-btn").addEventListener("click", () => {
-            resultsScreen.classList.add("hidden");
-            welcomeScreen.classList.remove("hidden");
-        });
+        }
     </script>
 </body>
-
 </html>
