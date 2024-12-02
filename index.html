@@ -14,9 +14,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
-
         .container {
             width: 90%;
             max-width: 600px;
@@ -26,7 +26,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
-
         button {
             padding: 10px 20px;
             margin: 10px;
@@ -36,13 +35,11 @@
             color: #ffffff;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: 0.3s;
         }
-
         button:hover {
             background-color: #2563eb;
         }
-
         .progress-bar {
             width: 100%;
             height: 10px;
@@ -51,18 +48,15 @@
             margin-top: 20px;
             overflow: hidden;
         }
-
         .progress-bar-inner {
             height: 100%;
             width: 0;
             background: #3b82f6;
             transition: width 0.5s ease;
         }
-
         .hidden {
             display: none;
         }
-
         canvas {
             margin: 20px auto;
             display: block;
@@ -70,102 +64,98 @@
     </style>
 </head>
 <body>
-    <main id="main-content">
-        <section id="welcome-screen" class="container">
-            <h1>Welcome to EngageSense</h1>
-            <p>Analyze audio engagement with cutting-edge technology.</p>
-            <button id="start-button">Get Started</button>
-        </section>
+    <div id="welcome-screen" class="container">
+        <h1>Welcome to EngageSense</h1>
+        <p>Analyze audio engagement with cutting-edge technology.</p>
+        <button id="start-button">Get Started</button>
+    </div>
 
-        <section id="upload-record-screen" class="container hidden">
-            <h1>Upload or Record Audio</h1>
-            <div>
-                <button id="upload-button">Upload Track</button>
-                <button id="analyze-upload">Analyze Upload</button>
-            </div>
-            <div>
-                <button id="record-button">Start Recording</button>
-                <button id="stop-recording" class="hidden">Stop Recording</button>
-                <button id="analyze-recording" class="hidden">Analyze Recording</button>
-            </div>
-            <div class="progress-bar">
-                <div id="progress-bar-inner" class="progress-bar-inner"></div>
-            </div>
-            <button id="back-to-welcome">Back</button>
-        </section>
+    <div id="upload-record-screen" class="container hidden">
+        <h1>Upload or Record Audio</h1>
+        <div>
+            <button id="upload-button">Upload Track</button>
+            <button id="analyze-upload">Analyze Upload</button>
+        </div>
+        <div>
+            <button id="record-button">Start Recording</button>
+            <button id="stop-recording" class="hidden">Stop Recording</button>
+            <button id="analyze-recording" class="hidden">Analyze Recording</button>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-bar-inner" class="progress-bar-inner"></div>
+        </div>
+        <button id="back-to-welcome">Back</button>
+    </div>
 
-        <section id="analysis-screen" class="container hidden">
-            <h1>Analyzing...</h1>
-            <p>Please wait while we process your audio data.</p>
-            <div class="progress-bar">
-                <div id="progress-bar-inner-analysis" class="progress-bar-inner"></div>
-            </div>
-        </section>
+    <div id="analysis-screen" class="container hidden">
+        <h1>Analyzing...</h1>
+        <p>Please wait while we process your audio data.</p>
+        <div class="progress-bar">
+            <div id="progress-bar-inner-analysis" class="progress-bar-inner"></div>
+        </div>
+    </div>
 
-        <section id="results-screen" class="container hidden">
-            <h1>Results Summary</h1>
-            <ul id="engagement-results">
-                <li>Physical Engagement: <strong>85%</strong></li>
-                <li>Emotional Engagement: <strong>78%</strong></li>
-                <li>Mental Engagement: <strong>92%</strong></li>
-                <li>Spiritual Engagement: <strong>67%</strong></li>
-            </ul>
-            <canvas id="results-chart" width="400" height="300"></canvas>
-            <button id="start-over">Start Over</button>
-        </section>
-    </main>
+    <div id="results-screen" class="container hidden">
+        <h1>Results Summary</h1>
+        <p>Physical Engagement: <strong>85%</strong></p>
+        <p>Emotional Engagement: <strong>78%</strong></p>
+        <p>Mental Engagement: <strong>92%</strong></p>
+        <p>Spiritual Engagement: <strong>67%</strong></p>
+        <canvas id="results-chart" width="400" height="300"></canvas>
+        <button id="start-over">Start Over</button>
+    </div>
 
     <script>
-        // DOM Elements
-        const screens = {
-            welcome: document.getElementById('welcome-screen'),
-            upload: document.getElementById('upload-record-screen'),
-            analysis: document.getElementById('analysis-screen'),
-            results: document.getElementById('results-screen'),
+        // References to DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const uploadRecordScreen = document.getElementById('upload-record-screen');
+        const analysisScreen = document.getElementById('analysis-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const progressBarInner = document.getElementById('progress-bar-inner');
+        const progressBarInnerAnalysis = document.getElementById('progress-bar-inner-analysis');
+        const startButton = document.getElementById('start-button');
+        const backToWelcome = document.getElementById('back-to-welcome');
+        const uploadButton = document.getElementById('upload-button');
+        const analyzeUploadButton = document.getElementById('analyze-upload');
+        const recordButton = document.getElementById('record-button');
+        const stopRecordingButton = document.getElementById('stop-recording');
+        const analyzeRecordingButton = document.getElementById('analyze-recording');
+        const startOverButton = document.getElementById('start-over');
+
+        // Navigation Handlers
+        startButton.onclick = () => {
+            welcomeScreen.classList.add('hidden');
+            uploadRecordScreen.classList.remove('hidden');
         };
 
-        const buttons = {
-            start: document.getElementById('start-button'),
-            back: document.getElementById('back-to-welcome'),
-            analyzeUpload: document.getElementById('analyze-upload'),
-            analyzeRecording: document.getElementById('analyze-recording'),
-            startOver: document.getElementById('start-over'),
+        backToWelcome.onclick = () => {
+            uploadRecordScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
         };
 
-        const progressBars = {
-            upload: document.getElementById('progress-bar-inner'),
-            analysis: document.getElementById('progress-bar-inner-analysis'),
+        analyzeUploadButton.onclick = () => startAnalysis();
+        analyzeRecordingButton.onclick = () => startAnalysis();
+
+        startOverButton.onclick = () => {
+            resultsScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
         };
 
-        // Navigation Functions
-        function navigateTo(screen) {
-            Object.values(screens).forEach(el => el.classList.add('hidden'));
-            screens[screen].classList.remove('hidden');
-        }
-
-        buttons.start.addEventListener('click', () => navigateTo('upload'));
-        buttons.back.addEventListener('click', () => navigateTo('welcome'));
-        buttons.startOver.addEventListener('click', () => navigateTo('welcome'));
-
-        // Analysis Simulation
         function startAnalysis() {
-            navigateTo('analysis');
+            uploadRecordScreen.classList.add('hidden');
+            analysisScreen.classList.remove('hidden');
             let progress = 0;
-
             const interval = setInterval(() => {
                 progress += 10;
-                progressBars.analysis.style.width = `${progress}%`;
-
+                progressBarInnerAnalysis.style.width = progress + '%';
                 if (progress >= 100) {
                     clearInterval(interval);
-                    navigateTo('results');
+                    analysisScreen.classList.add('hidden');
+                    resultsScreen.classList.remove('hidden');
                     renderChart();
                 }
             }, 500);
         }
-
-        buttons.analyzeUpload.addEventListener('click', startAnalysis);
-        buttons.analyzeRecording.addEventListener('click', startAnalysis);
 
         // Chart Rendering
         function renderChart() {
@@ -173,22 +163,16 @@
             const ctx = canvas.getContext('2d');
             const data = [85, 78, 92, 67];
             const labels = ['Physical', 'Emotional', 'Mental', 'Spiritual'];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             const barWidth = 80;
             const gap = 20;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             data.forEach((value, index) => {
                 const x = index * (barWidth + gap) + gap;
                 const y = canvas.height - (value / 100) * canvas.height;
-
                 ctx.fillStyle = ['#f87171', '#60a5fa', '#a78bfa', '#facc15'][index];
                 ctx.fillRect(x, y, barWidth, canvas.height - y);
-
                 ctx.fillStyle = '#fff';
-                ctx.textAlign = 'center';
-                ctx.fillText(labels[index], x + barWidth / 2, canvas.height - 10);
-                ctx.fillText(`${value}%`, x + barWidth / 2, y - 10);
+                ctx.fillText(labels[index], x + barWidth / 2 - 20, canvas.height - 10);
             });
         }
     </script>
