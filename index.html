@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EngageSense</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --text-color: #ffffff;
+            --button-color: #4a90e2;
+            --hover-color: #357ab8;
+            --progress-bg: #333;
+            --progress-color: #4caf50;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1, h2 {
+            color: var(--text-color);
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: var(--button-color);
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            color: var(--text-color);
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--hover-color);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        label {
+            background-color: var(--button-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            margin: 20px 0;
+            width: 100%;
+            height: 10px;
+            background-color: var(--progress-bg);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--progress-color);
+            transition: width 0.5s;
+        }
+
+        .chart-container {
+            margin: 20px auto;
+            width: 100%;
+            max-width: 500px;
+            display: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="welcome-screen">
+        <h1>Welcome to EngageSense</h1>
+        <video width="100%" controls>
+            <source src="mixer.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <button id="get-started-btn">Get Started</button>
+        <button id="learn-more-btn">Learn More</button>
+    </div>
+
+    <div class="container hidden" id="upload-screen">
+        <h1>Upload or Record Audio</h1>
+        <label for="audio-upload">Upload Track</label>
+        <input type="file" id="audio-upload" accept=".mp3, .wav">
+        <button id="analyze-upload-btn">Analyze Upload</button>
+        <br>
+        <button id="record-btn">Start Recording</button>
+        <button id="stop-record-btn" class="hidden">Stop Recording</button>
+        <button id="analyze-record-btn" class="hidden">Analyze Recording</button>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="upload-progress"></div>
+        </div>
+        <button id="back-to-welcome-btn">Back</button>
+        <button id="next-to-analysis-btn" class="hidden">Next</button>
+    </div>
+
+    <div class="container hidden" id="results-screen">
+        <h1>Results Summary</h1>
+        <h2>Engagement Metrics</h2>
+        <ul>
+            <li>Physical Engagement: <span id="physical-metric">85%</span></li>
+            <li>Emotional Engagement: <span id="emotional-metric">78%</span></li>
+            <li>Mental Engagement: <span id="mental-metric">92%</span></li>
+            <li>Spiritual Engagement: <span id="spiritual-metric">67%</span></li>
+        </ul>
+        <div class="chart-container">
+            <canvas id="engagement-chart"></canvas>
+        </div>
+        <button id="back-to-upload-btn">Back</button>
+        <button id="start-over-btn">Start Over</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const welcomeScreen = document.getElementById("welcome-screen");
+        const uploadScreen = document.getElementById("upload-screen");
+        const resultsScreen = document.getElementById("results-screen");
+
+        document.getElementById("get-started-btn").addEventListener("click", () => {
+            welcomeScreen.classList.add("hidden");
+            uploadScreen.classList.remove("hidden");
+        });
+
+        document.getElementById("learn-more-btn").addEventListener("click", () => {
+            alert("EngageSense provides audio analysis to understand audience engagement metrics.");
+        });
+
+        document.getElementById("audio-upload").addEventListener("change", () => {
+            document.getElementById("upload-progress").style.width = "100%";
+            document.getElementById("analyze-upload-btn").classList.remove("hidden");
+        });
+
+        document.getElementById("analyze-upload-btn").addEventListener("click", () => {
+            alert("Analyzing uploaded audio...");
+        });
+
+        document.getElementById("record-btn").addEventListener("click", () => {
+            document.getElementById("record-btn").classList.add("hidden");
+            document.getElementById("stop-record-btn").classList.remove("hidden");
+        });
+
+        document.getElementById("stop-record-btn").addEventListener("click", () => {
+            document.getElementById("stop-record-btn").classList.add("hidden");
+            document.getElementById("analyze-record-btn").classList.remove("hidden");
+        });
+
+        document.getElementById("analyze-record-btn").addEventListener("click", () => {
+            alert("Analyzing recorded audio...");
+        });
+
+        document.getElementById("back-to-welcome-btn").addEventListener("click", () => {
+            uploadScreen.classList.add("hidden");
+            welcomeScreen.classList.remove("hidden");
+        });
+
+        document.getElementById("next-to-analysis-btn").addEventListener("click", () => {
+            uploadScreen.classList.add("hidden");
+            resultsScreen.classList.remove("hidden");
+
+            const ctx = document.getElementById("engagement-chart").getContext("2d");
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ["Physical", "Emotional", "Mental", "Spiritual"],
+                    datasets: [{
+                        label: "Engagement (%)",
+                        data: [85, 78, 92, 67],
+                        backgroundColor: ["#f39c12", "#e74c3c", "#3498db", "#9b59b6"],
+                    }]
+                }
+            });
+        });
+
+        document.getElementById("back-to-upload-btn").addEventListener("click", () => {
+            resultsScreen.classList.add("hidden");
+            uploadScreen.classList.remove("hidden");
+        });
+
+        document.getElementById("start-over-btn").addEventListener("click", () => {
+            resultsScreen.classList.add("hidden");
+            welcomeScreen.classList.remove("hidden");
+        });
+    </script>
+</body>
+
+</html>
