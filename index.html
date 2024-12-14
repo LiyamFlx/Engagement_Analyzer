@@ -1,234 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EngageSense - Upload/Record Audio</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EngageSense Player - Real-Time Audience Engagement Analyzer">
+    <title>EngageSense Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
 
-    .container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      text-align: center;
-    }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      color: #fff;
-    }
+        .step {
+            display: none;
+        }
 
-    p {
-      font-size: 1rem;
-      margin-bottom: 20px;
-      color: #ccc;
-    }
+        .step.active {
+            display: block;
+        }
 
-    .upload-section, .record-section {
-      border: 2px dashed #444;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      width: 80%;
-      max-width: 600px;
-      background-color: #1e1e1e;
-      transition: 0.3s;
-    }
+        .breadcrumb {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
 
-    .upload-section:hover, .record-section:hover {
-      border-color: #888;
-    }
+        .breadcrumb span {
+            margin: 0 10px;
+            font-size: 1rem;
+            color: #007BFF;
+        }
 
-    .upload-section input {
-      display: none;
-    }
+        .breadcrumb span.active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
 
-    .upload-section label {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #333;
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
 
-    .upload-section label:hover {
-      background-color: #555;
-    }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-    .progress-bar {
-      display: flex;
-      align-items: center;
-      margin-top: 10px;
-    }
+        button:hover {
+            background-color: #0056b3;
+        }
 
-    .progress-bar span {
-      margin-right: 10px;
-      color: #ccc;
-    }
+        button:disabled {
+            background-color: #ccc;
+        }
 
-    .progress-bar div {
-      flex: 1;
-      height: 10px;
-      background: #444;
-      position: relative;
-    }
+        .file-upload {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            background-color: #f4f4f4;
+        }
 
-    .progress-bar div::after {
-      content: '';
-      display: block;
-      height: 100%;
-      background: #76c7c0;
-      width: 0%;
-      position: absolute;
-      transition: width 0.3s ease-in-out;
-    }
+        .file-upload.dragover {
+            background-color: #e0f7fa;
+            border-color: #007BFF;
+        }
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-    }
+        .progress-bar {
+            height: 20px;
+            background-color: #007BFF;
+            width: 0;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
 
-    .controls button {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      margin: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
+        .chart-container {
+            margin: 20px 0;
+        }
 
-    .controls button:hover {
-      background: #555;
-    }
+        .audio-controls {
+            text-align: center;
+        }
 
-    .navigation {
-      margin-top: 20px;
-    }
+        .spinner {
+            border: 4px solid rgba(0, 123, 255, 0.2);
+            border-top: 4px solid #007BFF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
 
-    .navigation button {
-      padding: 10px 20px;
-      margin: 0 10px;
-      border: none;
-      background: #333;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .navigation button:hover {
-      background: #555;
-    }
-
-    canvas {
-      margin-top: 20px;
-      max-width: 100%;
-      background: #1e1e1e;
-      border-radius: 8px;
-    }
-  </style>
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Upload or Record Audio</h1>
-    <p>Choose to upload an existing track or record audio directly within the browser.</p>
+    <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <div class="breadcrumb">
+            <span class="active">1. Welcome</span>
+            <span>2. Upload</span>
+            <span>3. Record</span>
+            <span>4. Results</span>
+            <span>5. Real-Time</span>
+        </div>
 
-    <!-- Upload Section -->
-    <div class="upload-section">
-      <h2>Upload Track</h2>
-      <p>Drag & drop your file here or click below to browse.</p>
-      <label for="file-upload">Browse Files</label>
-      <input type="file" id="file-upload" accept=".mp3,.wav,.ogg" onchange="handleFileUpload(event)">
-      <div class="progress-bar">
-        <span>Progress:</span>
-        <div id="upload-progress"></div>
-      </div>
+        <!-- Step 1: Welcome Screen -->
+        <div id="step1" class="step active">
+            <h1>Welcome to EngageSense Player</h1>
+            <p>Analyze and measure audience engagement in real-time.</p>
+            <p>Upload audio or stream live, and EngageSense Player will use advanced analytics to provide instant feedback.</p>
+            <div class="navigation">
+                <button id="next1">Next &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Upload Track -->
+        <div id="step2" class="step">
+            <h1>Upload Track</h1>
+            <div class="file-upload" id="fileUpload">
+                <p>Drag & drop your files here</p>
+                <p>or</p>
+                <button id="browseFiles">Browse files</button>
+                <div id="progressContainer" class="progress-bar"></div>
+            </div>
+            <audio id="audioPreview" controls class="audio-controls"></audio>
+            <div class="navigation">
+                <button id="back2">&larr; Back</button>
+                <button id="next2">Next &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Record Track -->
+        <div id="step3" class="step">
+            <h1>Record Track</h1>
+            <div class="chart-container">
+                <canvas id="recordingChart"></canvas>
+            </div>
+            <div class="audio-controls">
+                <button id="startRecording">Start</button>
+                <button id="stopRecording" disabled>Stop</button>
+            </div>
+            <div class="navigation">
+                <button id="back3">&larr; Back</button>
+                <button id="next3">Next &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Engagement Dashboard Results -->
+        <div id="step4" class="step">
+            <h1>Engagement Dashboard Results</h1>
+            <div class="chart-container">
+                <canvas id="engagementChart"></canvas>
+            </div>
+            <div class="navigation">
+                <button id="back4">&larr; Back</button>
+                <button id="next4">Next &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Real-Time Data Visualization -->
+        <div id="step5" class="step">
+            <h1>Real-Time Data</h1>
+            <div class="chart-container">
+                <canvas id="realTimeChart"></canvas>
+            </div>
+            <div class="navigation">
+                <button id="back5">&larr; Back</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Record Section -->
-    <div class="record-section">
-      <h2>Record Audio</h2>
-      <p>Use the in-browser controls to record your audio.</p>
-      <div class="controls">
-        <button onclick="startRecording()">Start</button>
-        <button onclick="pauseRecording()">Pause</button>
-        <button onclick="stopRecording()">Stop</button>
-      </div>
-      <canvas id="waveform" width="600" height="100"></canvas>
-      <p id="record-timer">Recording Time: 0:00</p>
-    </div>
+    <script>
+        const steps = document.querySelectorAll('.step');
+        const breadcrumbItems = document.querySelectorAll('.breadcrumb span');
+        let currentStep = 0;
 
-    <!-- Navigation -->
-    <div class="navigation">
-      <button onclick="navigateTo('welcome-screen')">Back</button>
-      <button onclick="navigateTo('analysis-screen')">Next</button>
-    </div>
-  </div>
+        document.querySelectorAll('.navigation button').forEach((button) => {
+            button.addEventListener('click', (e) => {
+                if (e.target.id.includes('next')) {
+                    if (currentStep < steps.length - 1) {
+                        steps[currentStep].classList.remove('active');
+                        breadcrumbItems[currentStep].classList.remove('active');
+                        currentStep++;
+                        steps[currentStep].classList.add('active');
+                        breadcrumbItems[currentStep].classList.add('active');
+                    }
+                } else if (e.target.id.includes('back')) {
+                    if (currentStep > 0) {
+                        steps[currentStep].classList.remove('active');
+                        breadcrumbItems[currentStep].classList.remove('active');
+                        currentStep--;
+                        steps[currentStep].classList.add('active');
+                        breadcrumbItems[currentStep].classList.add('active');
+                    }
+                }
+            });
+        });
 
-  <script>
-    // File Upload Logic
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        alert(`File "${file.name}" is selected.`);
-        // Simulate progress bar
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 10;
-          document.querySelector('#upload-progress').style.width = `${progress}%`;
-          if (progress >= 100) clearInterval(interval);
-        }, 300);
-      }
-    }
+        // Dynamic file upload with progress
+        const fileUpload = document.getElementById('fileUpload');
+        const progressBar = document.getElementById('progressContainer');
+        fileUpload.addEventListener('dragover', (e) => e.preventDefault());
+        fileUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            handleFileUpload(file);
+        });
 
-    // Recording Logic
-    let recordingTime = 0;
-    let recordingInterval;
-    function startRecording() {
-      recordingInterval = setInterval(() => {
-        recordingTime++;
-        const minutes = Math.floor(recordingTime / 60);
-        const seconds = recordingTime % 60;
-        document.getElementById('record-timer').textContent = `Recording Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-      }, 1000);
-    }
+        document.getElementById('browseFiles').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'audio/*';
+            input.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
+            input.click();
+        });
 
-    function pauseRecording() {
-      clearInterval(recordingInterval);
-    }
-
-    function stopRecording() {
-      clearInterval(recordingInterval);
-      alert('Recording Stopped');
-      recordingTime = 0;
-      document.getElementById('record-timer').textContent = 'Recording Time: 0:00';
-    }
-
-    // Waveform Visualization (Dummy)
-    const ctx = document.getElementById('waveform').getContext('2d');
-    ctx.fillStyle = '#76c7c0';
-    for (let i = 0; i < 600; i += 20) {
-      ctx.fillRect(i, Math.random() * 50 + 25, 10, 50);
-    }
-
-    // Navigation Logic
-    function navigateTo(screen) {
-      alert(`Navigating to ${screen}`);
-    }
-  </script>
+        function handleFileUpload(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onloadstart = () => {
+                progressBar.style.width = '0%';
+            };
+            reader.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const progress = (e.loaded / e.total) * 100;
+                    progressBar.style.width = `${progress}%`;
+                }
+            };
+            reader.onload = () => {
+                const audioPreview = document.getElementById('audioPreview');
+                audioPreview.src = reader.result;
+                audioPreview.load();
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
 </body>
 </html>
