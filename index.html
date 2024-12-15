@@ -3,131 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EngageSense - Real-Time Engagement Analyzer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>EngageSense</title>
     <script src="https://unpkg.com/wavesurfer.js"></script>
-    <script src="https://unpkg.com/meyda"></script>
+    <script src="https://unpkg.com/meyda/dist/meyda.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
             background-color: #121212;
-            color: #e0e0e0;
-            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
         }
-        .scrollbar::-webkit-scrollbar {
-            width: 8px;
+
+        header {
+            padding: 20px;
+            text-align: center;
+            background: #1f1f1f;
+            font-size: 24px;
+            font-weight: bold;
         }
-        .scrollbar::-webkit-scrollbar-thumb {
-            background: #4a5568;
-            border-radius: 4px;
+
+        nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: #222;
+            position: sticky;
+            top: 0;
         }
-        .highlight {
-            color: #3b82f6;
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #444;
+            transition: background-color 0.3s;
         }
+
+        nav a.active, nav a:hover {
+            background-color: #0f0;
+        }
+
+        .section {
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            background: #28a745;
+            color: #ffffff;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button.stop {
+            background: #dc3545;
+        }
+
         button:hover {
-            background-color: #2563eb;
+            opacity: 0.8;
+        }
+
+        .waveform-container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 800px;
+            border: 2px solid #0f0;
+        }
+
+        .metrics {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .metrics span {
+            font-size: 18px;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            margin: 20px auto;
+            width: 80%;
+            height: 10px;
+            background: #444;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar div {
+            width: 0;
+            height: 100%;
+            background: #0f0;
+            transition: width 0.3s;
+        }
+
+        canvas {
+            margin: 20px auto;
+            width: 90%;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+            }
+
+            .section {
+                padding: 10px;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-4 scrollbar">
-    <header class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-white">EngageSense - Real-Time Analyzer</h1>
-        <p class="text-gray-400">Analyze real-time audience engagement with AI</p>
-    </header>
+<body>
+    <header>EngageSense Prototype</header>
 
-    <main class="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- File Upload & Recording Section -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg col-span-1 md:col-span-2">
-            <h2 class="text-xl text-white font-semibold">Audio Input</h2>
-            <p class="text-gray-400 mb-4">Upload an audio file or record in real-time.</p>
-            <div class="space-y-4">
+    <nav>
+        <a href="#record" class="active" onclick="showSection('record')">Record</a>
+        <a href="#results" onclick="showSection('results')">Results</a>
+    </nav>
+
+    <main>
+        <!-- Record Section -->
+        <section id="record" class="section">
+            <h2>Record & Analyze Audio</h2>
+            <div class="waveform-container">
                 <div id="waveform"></div>
-                <input type="file" id="audioUpload" accept="audio/*" class="block w-full text-gray-300 bg-gray-700 p-2 rounded-lg" aria-label="Upload audio file" />
-                <button id="analyzeButton" class="bg-green-600 text-white px-4 py-2 rounded-lg w-full" aria-label="Analyze audio">Analyze Audio</button>
-                <button id="recordButton" class="bg-blue-600 text-white px-4 py-2 rounded-lg w-full" aria-label="Start recording audio">Start Recording</button>
-                <button id="stopButton" class="bg-red-600 text-white px-4 py-2 rounded-lg w-full hidden" aria-label="Stop recording audio">Stop Recording</button>
-                <audio id="audioPreview" controls class="w-full hidden" aria-label="Audio playback preview"></audio>
             </div>
-        </div>
-
-        <!-- Engagement Levels Visualization -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg col-span-1">
-            <h2 class="text-xl text-white font-semibold">Engagement Levels</h2>
-            <div class="chart-container">
-                <canvas id="engagementChart"></canvas>
+            <button class="start" onclick="startRecording()">Start Recording</button>
+            <button class="stop" onclick="stopRecording()" disabled>Stop Recording</button>
+            <input type="file" id="audio-upload" accept="audio/*" onchange="handleFileUpload(event)">
+            <div class="progress-bar"><div id="analysis-progress"></div></div>
+            <div class="metrics">
+                <span>RMS (Loudness): <strong id="rms">N/A</strong></span>
+                <span>Spectral Centroid: <strong id="centroid">N/A</strong></span>
+                <span>Engagement Level: <strong id="engagement">N/A</strong></span>
             </div>
-        </div>
-
-        <!-- Overall Engagement Visualization -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg col-span-1">
-            <h2 class="text-xl text-white font-semibold">Overall Engagement</h2>
-            <canvas id="overallEngagementChart" class="w-full mt-4"></canvas>
-            <p id="overallEngagementScore" class="text-3xl font-bold text-blue-400 mt-4 text-center">0</p>
-        </div>
-
-        <!-- Engagement Trends Visualization -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg col-span-1 md:col-span-2">
-            <h2 class="text-xl text-white font-semibold">Engagement Trends</h2>
-            <canvas id="engagementTrendsChart" class="w-full mt-4"></canvas>
-        </div>
-
-        <!-- Recommendations -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg col-span-1">
-            <h2 class="text-xl text-white font-semibold">Recommendations</h2>
-            <ul id="recommendationsContainer" class="mt-4 text-gray-300">
-                <li>Loading recommendations...</li>
-            </ul>
-        </div>
+            <canvas id="engagementChart"></canvas>
+        </section>
     </main>
 
-    <footer class="text-center mt-10">
-        <p class="text-gray-500 text-sm">&copy; 2024 EngageSense. All Rights Reserved.</p>
-    </footer>
-
     <script>
-        // Initialize WaveSurfer.js
-        const wavesurfer = WaveSurfer.create({
+        let audioContext, analyser, meydaAnalyzer, microphone, wavesurfer, model;
+        const progressBar = document.getElementById('analysis-progress');
+        const rmsDisplay = document.getElementById('rms');
+        const centroidDisplay = document.getElementById('centroid');
+        const engagementDisplay = document.getElementById('engagement');
+        const ctx = document.getElementById('engagementChart').getContext('2d');
+
+        let chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Engagement Score',
+                    data: [],
+                    borderColor: 'lime',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        async function loadModel() {
+            model = await tf.loadLayersModel('https://example.com/model.json'); // Add model URL
+        }
+        loadModel();
+
+        wavesurfer = WaveSurfer.create({
             container: '#waveform',
-            waveColor: '#007BFF',
-            progressColor: '#0056b3',
-            responsive: true,
-            height: 100,
+            waveColor: 'lime',
+            progressColor: 'green',
+            interact: true,
         });
 
-        document.getElementById('audioUpload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    microphone.connect(analyser);
+
+                    meydaAnalyzer = Meyda.createMeydaAnalyzer({
+                        audioContext: audioContext,
+                        source: microphone,
+                        bufferSize: 512,
+                        featureExtractors: ['rms', 'spectralCentroid'],
+                        callback: updateMetrics
+                    });
+                    meydaAnalyzer.start();
+                    wavesurfer.microphone = WaveSurfer.microphone.create({ wavesurfer: wavesurfer });
+                    wavesurfer.microphone.start();
+                    document.querySelector('.start').disabled = true;
+                    document.querySelector('.stop').disabled = false;
+                    startProgressBar();
+                })
+                .catch(err => console.error('Microphone error:', err));
+        }
+
+        function stopRecording() {
+            if (meydaAnalyzer) meydaAnalyzer.stop();
+            if (wavesurfer.microphone) wavesurfer.microphone.stop();
+            document.querySelector('.start').disabled = false;
+            document.querySelector('.stop').disabled = true;
+            resetProgressBar();
+        }
+
+        async function updateMetrics(features) {
+            const input = tf.tensor2d([[features.rms, features.spectralCentroid]]);
+            const prediction = await model.predict(input).data();
+            const score = prediction[0].toFixed(2);
+            engagementDisplay.innerText = score;
+
+            rmsDisplay.innerText = features.rms.toFixed(4);
+            centroidDisplay.innerText = features.spectralCentroid.toFixed(2);
+
+            chart.data.labels.push(new Date().toLocaleTimeString());
+            chart.data.datasets[0].data.push(score);
+            chart.update();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
             if (file) {
-                const url = URL.createObjectURL(file);
-                wavesurfer.load(url);
+                wavesurfer.loadBlob(file);
             }
-        });
+        }
 
-        // Initialize Meyda Analyzer
-        let analyzer;
-        wavesurfer.on('ready', () => {
-            const audioContext = wavesurfer.backend.ac;
-            const source = wavesurfer.backend.media;
-            analyzer = Meyda.createMeydaAnalyzer({
-                audioContext,
-                source,
-                bufferSize: 512,
-                featureExtractors: ['rms', 'spectralCentroid', 'zcr'],
-                callback: (features) => {
-                    console.log('Features:', features);
-                },
-            });
-        });
+        function startProgressBar() {
+            let progress = 0;
+            progressBar.style.width = '0%';
+            const interval = setInterval(() => {
+                if (progress >= 100) clearInterval(interval);
+                else {
+                    progress += 1;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 50);
+        }
 
-        document.getElementById('analyzeButton').addEventListener('click', () => {
-            if (analyzer) {
-                analyzer.start();
-                setTimeout(() => {
-                    analyzer.stop();
-                }, 5000); // Analyze for 5 seconds
-            } else {
-                alert('Please load an audio file first.');
-            }
-        });
+        function resetProgressBar() {
+            progressBar.style.width = '0%';
+        }
     </script>
 </body>
 </html>
